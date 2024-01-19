@@ -5,6 +5,7 @@ import { DatabaseModule } from './database/database.module'
 import { ConfigModule } from '@nestjs/config'
 import { PartialSchemaMap, object, string } from 'joi'
 import { EnviromentVariables } from './interfaces/config'
+import { UsersModule } from './users/users.module'
 
 const configValidtionSchema: PartialSchemaMap<{
   [K in keyof EnviromentVariables]: unknown
@@ -19,6 +20,7 @@ const configValidtionSchema: PartialSchemaMap<{
       validationSchema: object(configValidtionSchema),
       isGlobal: true,
     }),
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
