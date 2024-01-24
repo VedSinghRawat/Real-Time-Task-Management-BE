@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import postgres from 'postgres'
 import { PostgresJsDatabase, drizzle } from 'drizzle-orm/postgres-js'
-import * as schema from './schema'
+import * as schema from './database.schema'
 import { ConfigService } from '@nestjs/config'
 import { EnviromentVariables } from 'src/interfaces/config'
 

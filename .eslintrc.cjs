@@ -70,18 +70,6 @@ module.exports = {
           },
         ],
 
-        'no-unused-vars': [
-          'error',
-          {
-            vars: 'all',
-            args: 'after-used',
-            ignoreRestSiblings: false,
-            argsIgnorePattern: '^_',
-            destructuredArrayIgnorePattern: '^_',
-            varsIgnorePattern: '^_',
-          },
-        ],
-
         'no-mixed-operators': 'warn',
 
         '@typescript-eslint/no-empty-interface': 'off',
