@@ -1,7 +1,7 @@
 import { Body, Controller, Post, UsePipes } from '@nestjs/common'
 import { LoginValidator } from 'src/validator/auth/login.validator'
-import type { LoginDTO } from 'src/validator/auth/login.validator'
 import { SignupValidator } from 'src/validator/auth/signup.validator'
+import type { LoginDTO } from 'src/validator/auth/login.validator'
 import type { SignupDTO } from 'src/validator/auth/signup.validator'
 
 @Controller('')
