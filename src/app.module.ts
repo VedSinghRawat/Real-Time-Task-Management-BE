@@ -16,11 +16,12 @@ const configValidtionSchema: Joi.PartialSchemaMap<{
 
 @Module({
   imports: [
-    DatabaseModule,
     ConfigModule.forRoot({
+      envFilePath: ['.env.dev', '.env'],
       validationSchema: Joi.object(configValidtionSchema),
       isGlobal: true,
     }),
+    DatabaseModule,
     UsersModule,
     AuthModule,
   ],
