@@ -1,12 +1,14 @@
 import { Controller, Get } from '@nestjs/common'
-import { AppService } from './app.service'
+import { DatabaseService } from './database/database.service'
+import { users } from './database/database.schema'
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly dbService: DatabaseService) {}
 
-  @Get('hello')
-  hello(): string {
-    return this.appService.sayHello()
+  @Get('test')
+  test() {
+    const a = this.dbService.db.insert(users).values({ email: 'hello@gmail.com', password: 'something123', username: 'hello world' })
+    return a
   }
 }
