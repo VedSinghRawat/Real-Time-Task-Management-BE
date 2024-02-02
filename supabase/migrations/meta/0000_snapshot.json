@@ -1,5 +1,5 @@
 {
-  "id": "e1d2557e-fb54-418d-a1c6-cc59d9eabf67",
+  "id": "ac46ae64-3369-46fb-8d25-506bdd2fcfe9",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -36,7 +36,8 @@
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -69,7 +70,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "project_users_project_id_user_id_unique": {
+          "name": "project_users_project_id_user_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "project_id",
+            "user_id"
+          ]
+        }
+      }
     },
     "projects": {
       "name": "projects",
@@ -97,7 +107,8 @@
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -117,7 +128,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "projects_name_owner_id_unique": {
+          "name": "projects_name_owner_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name",
+            "owner_id"
+          ]
+        }
+      }
     },
     "task_users": {
       "name": "task_users",
@@ -145,7 +165,8 @@
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -178,7 +199,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "task_users_user_id_task_uuid_unique": {
+          "name": "task_users_user_id_task_uuid_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "user_id",
+            "task_uuid"
+          ]
+        }
+      }
     },
     "tasks": {
       "name": "tasks",
@@ -226,7 +256,8 @@
           "name": "type",
           "type": "type",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "'todo'"
         },
         "order": {
           "name": "order",
@@ -238,7 +269,8 @@
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "now()"
         }
       },
       "indexes": {},
@@ -258,7 +290,16 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "tasks_order_type_unique": {
+          "name": "tasks_order_type_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "order",
+            "type"
+          ]
+        }
+      }
     },
     "users": {
       "name": "users",
@@ -292,13 +333,29 @@
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "now()"
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "users_username_unique": {
+          "name": "users_username_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "username"
+          ]
+        },
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      }
     }
   },
   "enums": {
