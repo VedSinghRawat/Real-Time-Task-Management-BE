@@ -15,7 +15,7 @@ export class DatabaseService {
     const dbURL = configService.get('DATABASE_URL', { infer: true })
 
     if (dbURL) {
-      this.client = postgres(dbURL)
+      this.client = postgres(dbURL, { prepare: false })
       this.db = drizzle(this.client, { schema })
     } else throw { message: 'No DATABASE_URL found in env' }
   }
