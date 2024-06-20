@@ -1,4 +1,4 @@
-import { bigint, bigserial, integer, pgEnum, pgTable, text, timestamp, unique, uuid, varchar } from 'drizzle-orm/pg-core'
+import { bigint, bigserial, boolean, integer, pgEnum, pgTable, serial, text, timestamp, unique, uuid, varchar } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
@@ -11,8 +11,9 @@ export const users = pgTable('users', {
 export const projects = pgTable(
   'projects',
   {
-    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    uuid: uuid('uuid').defaultRandom().primaryKey(),
     name: varchar('name', { length: 50 }).notNull(),
+    public: boolean('public').default(false),
     ownerId: bigint('owner_id', { mode: 'number' })
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
@@ -27,10 +28,10 @@ export const typeEnum = pgEnum('type', ['todo', 'doing', 'done'])
 export const tasks = pgTable(
   'tasks',
   {
-    uuid: uuid('uuid').defaultRandom().primaryKey(),
-    projectId: bigint('project_id', { mode: 'number' })
+    id: serial('id').primaryKey(),
+    projectUUID: varchar('project_uuid')
       .notNull()
-      .references(() => projects.id, { onDelete: 'cascade' }),
+      .references(() => projects.uuid, { onDelete: 'cascade' }),
     description: text('description').notNull(),
     estimatedTime: integer('estimated_time').notNull(),
     timeLeft: integer('time_left').notNull(),
@@ -44,14 +45,14 @@ export const tasks = pgTable(
   })
 )
 
-export const roleEnum = pgEnum('role', ['manager', 'worker'])
+export const roleEnum = pgEnum('role', ['team leader', 'member'])
 export const projectUsers = pgTable(
   'project_users',
   {
     id: bigserial('id', { mode: 'number' }).primaryKey(),
-    projectId: bigint('project_id', { mode: 'number' })
+    projectUUID: varchar('project_uuid')
       .notNull()
-      .references(() => projects.id, { onDelete: 'cascade' }),
+      .references(() => projects.uuid, { onDelete: 'cascade' }),
     userId: bigint('user_id', { mode: 'number' })
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
@@ -59,7 +60,7 @@ export const projectUsers = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   },
   (table) => ({
-    projUserUniq: unique().on(table.projectId, table.userId),
+    projUserUniq: unique().on(table.projectUUID, table.userId),
   })
 )
 
@@ -70,12 +71,15 @@ export const taskUsers = pgTable(
     userId: bigint('user_id', { mode: 'number' })
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    taskUUID: uuid('task_uuid')
+    taskId: uuid('task_id')
       .notNull()
-      .references(() => tasks.uuid, { onDelete: 'cascade' }),
+      .references(() => tasks.id, { onDelete: 'cascade' }),
+    projectUUID: varchar('project_uuid')
+      .notNull()
+      .references(() => projects.uuid, { onDelete: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   },
   (table) => ({
-    userTaskUniq: unique().on(table.userId, table.taskUUID),
+    userTaskUniq: unique().on(table.userId, table.taskId, table.projectUUID),
   })
 )
