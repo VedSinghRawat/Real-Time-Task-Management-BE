@@ -12,6 +12,7 @@ const configValidtionSchema: Joi.PartialSchemaMap<{
   [K in keyof EnviromentVariables]: unknown
 }> = {
   DATABASE_URL: Joi.string(),
+  JWT_SECRET: Joi.string(),
 }
 
 @Module({

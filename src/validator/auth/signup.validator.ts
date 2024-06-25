@@ -9,10 +9,10 @@ export const signupSchema = z
       .string()
       .min(8)
       .max(20)
-      .regex(/.*[A-Z].*/)
-      .regex(/.*\d.*/)
-      .regex(/.*[a-z].*/)
-      .regex(/..*[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~].*/),
+      .regex(/.*[A-Z].*/, 'At least one capital letter')
+      .regex(/.*\d.*/, 'At least one number')
+      .regex(/.*[a-z].*/, 'At least one lowercase letter')
+      .regex(/..*[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~].*/, 'At least one special character'),
   })
   .required()
 

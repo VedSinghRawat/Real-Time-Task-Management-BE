@@ -2,7 +2,7 @@ import { bigint, bigserial, boolean, integer, pgEnum, pgTable, serial, text, tim
 
 export const users = pgTable('users', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
-  username: varchar('username', { length: 24 }).notNull().unique(),
+  username: varchar('username', { length: 24 }).notNull(),
   email: varchar('email', { length: 320 }).notNull().unique(),
   password: text('password').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),

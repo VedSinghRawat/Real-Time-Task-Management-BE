@@ -19,7 +19,7 @@ export class Validator<T extends ZodType> implements PipeTransform {
           return curr
         }, {})
 
-        throw new BadRequestException('Validation Failed', { cause: errs, description: '' })
+        throw new BadRequestException(errs)
       }
     }
   }
