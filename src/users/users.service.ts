@@ -17,7 +17,7 @@ export class UsersService {
   }
 
   async findByEmail(email: User['email']) {
-    return await this.db.query.users.findFirst({ where: (u, o) => o.eq(u.email, email), columns: { password: false } })
+    return await this.db.query.users.findFirst({ where: (u, o) => o.eq(u.email, email) })
   }
 
   async create(data: SignupDTO) {
