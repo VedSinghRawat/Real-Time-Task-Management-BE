@@ -26,7 +26,7 @@ export class AuthService {
   login(id: number) {
     const payload = { id }
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: this.jwtService.sign(payload, { expiresIn: '30days' }),
     }
   }
 

@@ -14,20 +14,22 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('login')
   login(@Req() req: Request & { user: User }) {
-    return this.authService.login(req.user.id)
+    const data = this.authService.login(req.user.id)
+    return { access_token: data.access_token, user: req.user }
   }
 
   @Post('signup')
   @UsePipes(SignupValidator)
   async signup(@Body() signupReq: SignupDTO) {
     const user = await this.authService.signUp(signupReq)
+    const data = this.authService.login(user.id)
 
-    return this.authService.login(user.id)
+    return { access_token: data.access_token, user }
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
   me(@Req() req: Request & { user: User }) {
-    return req.user
+    return { user: req.user }
   }
 }
