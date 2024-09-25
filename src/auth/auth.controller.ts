@@ -4,7 +4,7 @@ import type { SignupDTO } from 'src/validator/auth/signup.validator'
 import { Request } from 'express'
 import { AuthService } from './auth.service'
 import { JwtAuthGuard } from './jwt.guard'
-import { User } from 'src/entities/user.entity'
+import { User } from 'src/database/database.schema'
 import { LocalAuthGuard } from './local.guard'
 
 @Controller('')

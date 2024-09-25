@@ -1,5 +1,5 @@
 {
-  "id": "ac46ae64-3369-46fb-8d25-506bdd2fcfe9",
+  "id": "87cf4b8e-97fc-4132-ad38-c22943f6ae75",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -36,7 +36,7 @@
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "now()"
         }
       },
@@ -97,6 +97,19 @@
           "primaryKey": false,
           "notNull": true
         },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "public": {
+          "name": "public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
         "owner_id": {
           "name": "owner_id",
           "type": "bigint",
@@ -107,7 +120,7 @@
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "now()"
         }
       },
@@ -155,9 +168,15 @@
           "primaryKey": false,
           "notNull": true
         },
-        "task_uuid": {
-          "name": "task_uuid",
-          "type": "uuid",
+        "task_id": {
+          "name": "task_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "project_id": {
+          "name": "project_id",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true
         },
@@ -165,7 +184,7 @@
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "now()"
         }
       },
@@ -184,15 +203,28 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "task_users_task_uuid_tasks_uuid_fk": {
-          "name": "task_users_task_uuid_tasks_uuid_fk",
+        "task_users_task_id_tasks_id_fk": {
+          "name": "task_users_task_id_tasks_id_fk",
           "tableFrom": "task_users",
           "tableTo": "tasks",
           "columnsFrom": [
-            "task_uuid"
+            "task_id"
           ],
           "columnsTo": [
-            "uuid"
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "task_users_project_id_projects_id_fk": {
+          "name": "task_users_project_id_projects_id_fk",
+          "tableFrom": "task_users",
+          "tableTo": "projects",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "columnsTo": [
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -200,12 +232,13 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "task_users_user_id_task_uuid_unique": {
-          "name": "task_users_user_id_task_uuid_unique",
+        "task_users_user_id_task_id_project_id_unique": {
+          "name": "task_users_user_id_task_id_project_id_unique",
           "nullsNotDistinct": false,
           "columns": [
             "user_id",
-            "task_uuid"
+            "task_id",
+            "project_id"
           ]
         }
       }
@@ -214,12 +247,11 @@
       "name": "tasks",
       "schema": "",
       "columns": {
-        "uuid": {
-          "name": "uuid",
-          "type": "uuid",
+        "id": {
+          "name": "id",
+          "type": "bigserial",
           "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
+          "notNull": true
         },
         "project_id": {
           "name": "project_id",
@@ -254,7 +286,7 @@
         },
         "type": {
           "name": "type",
-          "type": "type",
+          "type": "task_type",
           "primaryKey": false,
           "notNull": true,
           "default": "'todo'"
@@ -269,7 +301,7 @@
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "now()"
         }
       },
@@ -333,7 +365,7 @@
           "name": "created_at",
           "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "default": "now()"
         }
       },
@@ -341,13 +373,6 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "users_username_unique": {
-          "name": "users_username_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "username"
-          ]
-        },
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
@@ -362,12 +387,12 @@
     "role": {
       "name": "role",
       "values": {
-        "manager": "manager",
-        "worker": "worker"
+        "team leader": "team leader",
+        "member": "member"
       }
     },
-    "type": {
-      "name": "type",
+    "task_type": {
+      "name": "task_type",
       "values": {
         "todo": "todo",
         "doing": "doing",

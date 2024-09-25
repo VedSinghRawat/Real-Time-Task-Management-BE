@@ -1,44 +1,47 @@
-import { bigint, bigserial, boolean, integer, pgEnum, pgTable, serial, text, timestamp, unique, uuid, varchar } from 'drizzle-orm/pg-core'
+import { InferSelectModel } from 'drizzle-orm'
+import { bigint, bigserial, boolean, integer, pgEnum, pgTable, text, timestamp, unique, varchar } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
   username: varchar('username', { length: 24 }).notNull(),
   email: varchar('email', { length: 320 }).notNull().unique(),
   password: text('password').notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })
+export type User = InferSelectModel<typeof users>
 
 export const projects = pgTable(
   'projects',
   {
-    uuid: uuid('uuid').defaultRandom().primaryKey(),
-    name: varchar('name', { length: 50 }).notNull(),
-    public: boolean('public').default(false),
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    title: varchar('name', { length: 50 }).notNull(),
+    description: text('description').notNull(),
+    public: boolean('public').default(false).notNull(),
     ownerId: bigint('owner_id', { mode: 'number' })
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
-    projNameUniq: unique().on(table.name, table.ownerId),
+    projNameUniq: unique().on(table.title, table.ownerId),
   })
 )
 
-export const typeEnum = pgEnum('type', ['todo', 'doing', 'done'])
+export const taskTypeEnum = pgEnum('task_type', ['todo', 'doing', 'done'])
 export const tasks = pgTable(
   'tasks',
   {
-    id: serial('id').primaryKey(),
-    projectUUID: varchar('project_uuid')
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    projectId: bigint('project_id', { mode: 'number' })
       .notNull()
-      .references(() => projects.uuid, { onDelete: 'cascade' }),
+      .references(() => projects.id, { onDelete: 'cascade' }),
     description: text('description').notNull(),
     estimatedTime: integer('estimated_time').notNull(),
     timeLeft: integer('time_left').notNull(),
     overTime: integer('over_time').notNull().default(0),
-    type: typeEnum('type').notNull().default('todo'),
+    type: taskTypeEnum('type').notNull().default('todo'),
     order: integer('order').notNull(),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
     orderTypeUniq: unique().on(table.order, table.type),
@@ -50,17 +53,17 @@ export const projectUsers = pgTable(
   'project_users',
   {
     id: bigserial('id', { mode: 'number' }).primaryKey(),
-    projectUUID: varchar('project_uuid')
+    projectId: bigint('project_id', { mode: 'number' })
       .notNull()
-      .references(() => projects.uuid, { onDelete: 'cascade' }),
+      .references(() => projects.id, { onDelete: 'cascade' }),
     userId: bigint('user_id', { mode: 'number' })
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     role: roleEnum('role'),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
-    projUserUniq: unique().on(table.projectUUID, table.userId),
+    projUserUniq: unique().on(table.projectId, table.userId),
   })
 )
 
@@ -71,15 +74,15 @@ export const taskUsers = pgTable(
     userId: bigint('user_id', { mode: 'number' })
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    taskId: uuid('task_id')
+    taskId: bigint('task_id', { mode: 'number' })
       .notNull()
       .references(() => tasks.id, { onDelete: 'cascade' }),
-    projectUUID: varchar('project_uuid')
+    projectId: bigint('project_id', { mode: 'number' })
       .notNull()
-      .references(() => projects.uuid, { onDelete: 'cascade' }),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
-    userTaskUniq: unique().on(table.userId, table.taskId, table.projectUUID),
+    userTaskUniq: unique().on(table.userId, table.taskId, table.projectId),
   })
 )

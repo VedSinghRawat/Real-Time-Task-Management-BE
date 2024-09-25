@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { users } from 'src/database/database.schema'
+import { User, users } from 'src/database/database.schema'
 import { DatabaseService } from 'src/database/database.service'
-import { User } from 'src/entities/user.entity'
 import { SignupDTO } from 'src/validator/auth/signup.validator'
 
 @Injectable()
