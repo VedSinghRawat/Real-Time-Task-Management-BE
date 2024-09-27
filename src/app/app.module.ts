@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
-import { DatabaseModule } from './database/database.module'
+import { DatabaseModule } from '../database/database.module'
 import { ConfigModule } from '@nestjs/config'
 import * as Joi from 'joi'
-import { EnviromentVariables } from './interfaces/config'
-import { UsersModule } from './users/users.module'
-import { AuthModule } from './auth/auth.module'
+import { EnviromentVariables } from '../interfaces/config'
+import { UsersModule } from '../users/users.module'
+import { AuthModule } from '../auth/auth.module'
+import { ProjectsModule } from '../projects/projects.module'
 
 const configValidtionSchema: Joi.PartialSchemaMap<{
   [K in keyof EnviromentVariables]: unknown
@@ -25,6 +26,7 @@ const configValidtionSchema: Joi.PartialSchemaMap<{
     DatabaseModule,
     UsersModule,
     AuthModule,
+    ProjectsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

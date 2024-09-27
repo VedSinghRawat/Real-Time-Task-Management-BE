@@ -1,11 +1,10 @@
 import { Body, Req, Controller, Post, UseGuards, UsePipes, Get } from '@nestjs/common'
-import { SignupValidator } from 'src/validator/auth/signup.validator'
-import type { SignupDTO } from 'src/validator/auth/signup.validator'
 import { Request } from 'express'
 import { AuthService } from './auth.service'
-import { JwtAuthGuard } from './jwt.guard'
+import { JwtAuthGuard } from './gaurds/jwt/jwt.guard'
 import { User } from 'src/database/database.schema'
-import { LocalAuthGuard } from './local.guard'
+import { LocalAuthGuard } from './gaurds/local/local.guard'
+import { AuthDTOSignup, AuthValidatorSignup } from './dto/auth.dto'
 
 @Controller('')
 export class AuthController {
@@ -19,8 +18,8 @@ export class AuthController {
   }
 
   @Post('signup')
-  @UsePipes(SignupValidator)
-  async signup(@Body() signupReq: SignupDTO) {
+  @UsePipes(AuthValidatorSignup)
+  async signup(@Body() signupReq: AuthDTOSignup) {
     const user = await this.authService.signUp(signupReq)
     const data = this.authService.login(user.id)
 

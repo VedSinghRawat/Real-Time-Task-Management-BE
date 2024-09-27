@@ -1,7 +1,7 @@
+import { Validator } from 'src/util'
 import { z } from 'zod'
-import { Validator } from '../base.validator'
 
-export const signupSchema = z
+const signupSchema = z
   .object({
     username: z.string().min(1).max(24),
     email: z.string().email(),
@@ -16,5 +16,10 @@ export const signupSchema = z
   })
   .required()
 
-export type SignupDTO = z.infer<typeof signupSchema>
-export const SignupValidator = new Validator(signupSchema)
+export type AuthDTOSignup = z.infer<typeof signupSchema>
+export const AuthValidatorSignup = new Validator(signupSchema)
+
+const loginSchema = signupSchema.pick({ email: true, password: true })
+
+export type AuthDTOLogin = z.infer<typeof loginSchema>
+export const AuthValidatorLogin = new Validator(loginSchema)

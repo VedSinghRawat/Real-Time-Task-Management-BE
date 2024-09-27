@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { User, users } from 'src/database/database.schema'
 import { DatabaseService } from 'src/database/database.service'
-import { SignupDTO } from 'src/validator/auth/signup.validator'
+import { AuthDTOSignup } from 'src/auth/dto/auth.dto'
 
 @Injectable()
 export class UsersService {
@@ -19,7 +19,7 @@ export class UsersService {
     return await this.db.query.users.findFirst({ where: (u, o) => o.eq(u.email, email) })
   }
 
-  async create(data: SignupDTO) {
+  async create(data: AuthDTOSignup) {
     return (await this.db.insert(users).values(data).returning({ id: users.id, email: users.email, username: users.username }))[0]!
   }
 }

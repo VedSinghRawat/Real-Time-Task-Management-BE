@@ -26,6 +26,7 @@ export const projects = pgTable(
     projNameUniq: unique().on(table.title, table.ownerId),
   })
 )
+export type Project = InferSelectModel<typeof projects>
 
 export const taskTypeEnum = pgEnum('task_type', ['todo', 'doing', 'done'])
 export const tasks = pgTable(
@@ -47,6 +48,7 @@ export const tasks = pgTable(
     orderTypeUniq: unique().on(table.order, table.type),
   })
 )
+export type Task = InferSelectModel<typeof tasks>
 
 export const roleEnum = pgEnum('role', ['team leader', 'member'])
 export const projectUsers = pgTable(
@@ -66,6 +68,7 @@ export const projectUsers = pgTable(
     projUserUniq: unique().on(table.projectId, table.userId),
   })
 )
+export type ProjectUser = InferSelectModel<typeof projectUsers>
 
 export const taskUsers = pgTable(
   'task_users',
@@ -86,3 +89,4 @@ export const taskUsers = pgTable(
     userTaskUniq: unique().on(table.userId, table.taskId, table.projectId),
   })
 )
+export type TaskUser = InferSelectModel<typeof taskUsers>

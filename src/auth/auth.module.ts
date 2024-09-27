@@ -3,9 +3,9 @@ import { AuthController } from './auth.controller'
 import { AuthService } from './auth.service'
 import { UsersModule } from 'src/users/users.module'
 import { PassportModule } from '@nestjs/passport'
-import { LocalStrategy } from './local.stratergy'
+import { LocalStrategy } from './gaurds/local/local.stratergy'
 import { JwtModule } from '@nestjs/jwt'
-import { JwtStrategy } from './jwt.stratergy'
+import { JwtStrategy } from './gaurds/jwt/jwt.stratergy'
 
 @Module({
   controllers: [AuthController],
@@ -15,7 +15,7 @@ import { JwtStrategy } from './jwt.stratergy'
     JwtModule.registerAsync({
       useFactory: () => ({
         secret: process.env.JWT_SECRET,
-        signOptions: { expiresIn: '60s' },
+        signOptions: { expiresIn: '7d' },
       }),
     }),
   ],
