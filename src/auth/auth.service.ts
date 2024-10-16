@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
 import { hash, compare } from 'bcrypt'
 import { UsersService } from 'src/users/users.service'
-import { SignupDTO } from 'src/validator/auth/signup.validator'
 import { JwtService } from '@nestjs/jwt'
+import { AuthDTOSignup } from './dto/auth.dto'
 
 @Injectable()
 export class AuthService {
@@ -30,7 +30,7 @@ export class AuthService {
     }
   }
 
-  async signUp(data: SignupDTO) {
+  async signUp(data: AuthDTOSignup) {
     const { password, ...userData } = data
 
     const oldUser = await this.usersService.findByEmail(userData.email)

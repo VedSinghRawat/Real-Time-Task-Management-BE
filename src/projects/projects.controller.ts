@@ -1,13 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common'
+import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, UseGuards, Req, ForbiddenException, NotFoundException } from '@nestjs/common'
 import { ProjectsService } from './projects.service'
+import projectsDto, { ProjectCreateDTO, ProjectUpdateDTO } from './dto/projects.dto'
+import { JwtAuthGuard } from 'src/auth/gaurds/jwt/jwt.guard'
+import { User } from 'src/database/database.schema'
 
 @Controller('projects')
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createProjectDto: CreateProjectDto) {
-    return this.projectsService.create(createProjectDto)
+  @UsePipes(projectsDto.createValidator)
+  create(@Body() createProjectDto: ProjectCreateDTO, @Req() req: Request & { user: User }) {
+    return this.projectsService.create({ ...createProjectDto, ownerId: req.user.id })
   }
 
   @Get()
@@ -20,8 +25,20 @@ export class ProjectsController {
     return this.projectsService.findOne(+id)
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {
+  @UsePipes(projectsDto.updateValidator)
+  async update(@Param('id') id: string, @Body() updateProjectDto: ProjectUpdateDTO, @Req() req: Request & { user: User }) {
+    const project = await this.projectsService.findOne(+id)
+
+    if (!project) {
+      throw new NotFoundException('Project not found')
+    }
+
+    if (project.ownerId !== req.user.id) {
+      throw new ForbiddenException('You are not authorized to update this project')
+    }
+
     return this.projectsService.update(+id, updateProjectDto)
   }
 

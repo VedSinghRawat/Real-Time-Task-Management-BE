@@ -1,14 +1,19 @@
-import { InferSelectModel } from 'drizzle-orm'
+import { relations } from 'drizzle-orm'
 import { bigint, bigserial, boolean, integer, pgEnum, pgTable, text, timestamp, unique, varchar } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
   username: varchar('username', { length: 24 }).notNull(),
   email: varchar('email', { length: 320 }).notNull().unique(),
-  password: text('password').notNull(),
+  password: varchar('password').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })
-export type User = InferSelectModel<typeof users>
+export type User = typeof users.$inferSelect
+
+export const userRelations = relations(users, ({ many }) => ({
+  projectUsers: many(projectUsers),
+  taskUsers: many(taskUsers),
+}))
 
 export const projects = pgTable(
   'projects',
@@ -26,7 +31,42 @@ export const projects = pgTable(
     projNameUniq: unique().on(table.title, table.ownerId),
   })
 )
-export type Project = InferSelectModel<typeof projects>
+export type Project = typeof projects.$inferSelect
+
+export const projectRelations = relations(projects, ({ many }) => ({
+  projectUsers: many(projectUsers),
+}))
+
+export const roleEnum = pgEnum('role', ['team leader', 'member'])
+export const projectUsers = pgTable(
+  'project_users',
+  {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    projectId: bigint('project_id', { mode: 'number' })
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade' }),
+    userId: bigint('user_id', { mode: 'number' })
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    role: roleEnum('role'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    projUserUniq: unique().on(table.projectId, table.userId),
+  })
+)
+export type ProjectUser = typeof projectUsers.$inferSelect
+
+export const projectUserRelations = relations(projectUsers, ({ one }) => ({
+  project: one(projects, {
+    fields: [projectUsers.projectId],
+    references: [projects.id],
+  }),
+  user: one(users, {
+    fields: [projectUsers.userId],
+    references: [users.id],
+  }),
+}))
 
 export const taskTypeEnum = pgEnum('task_type', ['todo', 'doing', 'done'])
 export const tasks = pgTable(
@@ -48,27 +88,14 @@ export const tasks = pgTable(
     orderTypeUniq: unique().on(table.order, table.type),
   })
 )
-export type Task = InferSelectModel<typeof tasks>
+export type Task = typeof tasks.$inferSelect
 
-export const roleEnum = pgEnum('role', ['team leader', 'member'])
-export const projectUsers = pgTable(
-  'project_users',
-  {
-    id: bigserial('id', { mode: 'number' }).primaryKey(),
-    projectId: bigint('project_id', { mode: 'number' })
-      .notNull()
-      .references(() => projects.id, { onDelete: 'cascade' }),
-    userId: bigint('user_id', { mode: 'number' })
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
-    role: roleEnum('role'),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => ({
-    projUserUniq: unique().on(table.projectId, table.userId),
-  })
-)
-export type ProjectUser = InferSelectModel<typeof projectUsers>
+export const taskRelations = relations(tasks, ({ one }) => ({
+  project: one(projects, {
+    fields: [tasks.projectId],
+    references: [projects.id],
+  }),
+}))
 
 export const taskUsers = pgTable(
   'task_users',
@@ -89,4 +116,15 @@ export const taskUsers = pgTable(
     userTaskUniq: unique().on(table.userId, table.taskId, table.projectId),
   })
 )
-export type TaskUser = InferSelectModel<typeof taskUsers>
+export type TaskUser = typeof taskUsers.$inferSelect
+
+export const taskUserRelations = relations(taskUsers, ({ one }) => ({
+  task: one(tasks, {
+    fields: [taskUsers.taskId],
+    references: [tasks.id],
+  }),
+  user: one(users, {
+    fields: [taskUsers.userId],
+    references: [users.id],
+  }),
+}))

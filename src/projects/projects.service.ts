@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common'
-import { CreateProjectDto } from './dto/create-project.dto'
-import { UpdateProjectDto } from './dto/update-project.dto'
 import { DatabaseService } from 'src/database/database.service'
 import { projects } from 'src/database/database.schema'
+import projectsDto from './dto/projects.dto'
+import { z } from 'zod'
+import { eq } from 'drizzle-orm'
 
 @Injectable()
 export class ProjectsService {
@@ -12,23 +13,23 @@ export class ProjectsService {
     this.db = _.db
   }
 
-  create(createProjectDto: CreateProjectDto) {
-    return this.db.insert(projects).values(createProjectDto).returning()
+  async create(proj: typeof projects.$inferInsert) {
+    return await this.db.insert(projects).values(proj).returning()
   }
 
-  findAll() {
-    return `This action returns all projects`
+  async findAll() {
+    return await this.db.select().from(projects)
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} project`
+  async findOne(id: number) {
+    return (await this.db.select().from(projects).where(eq(projects.id, id)))[0]
   }
 
-  update(id: number, updateProjectDto: UpdateProjectDto) {
-    return `This action updates a #${id} project`
+  async update(id: number, updateProjectDto: z.infer<typeof projectsDto.updateSchema>) {
+    return await this.db.update(projects).set(updateProjectDto).where(eq(projects.id, id))
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} project`
+  async remove(id: number) {
+    return await this.db.delete(projects).where(eq(projects.id, id))
   }
 }

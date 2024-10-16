@@ -4,7 +4,7 @@ import { AuthService } from './auth.service'
 import { JwtAuthGuard } from './gaurds/jwt/jwt.guard'
 import { User } from 'src/database/database.schema'
 import { LocalAuthGuard } from './gaurds/local/local.guard'
-import { AuthDTOSignup, AuthValidatorSignup } from './dto/auth.dto'
+import authDto, { AuthDTOSignup } from './dto/auth.dto'
 
 @Controller('')
 export class AuthController {
@@ -18,7 +18,7 @@ export class AuthController {
   }
 
   @Post('signup')
-  @UsePipes(AuthValidatorSignup)
+  @UsePipes(authDto.signupValidator)
   async signup(@Body() signupReq: AuthDTOSignup) {
     const user = await this.authService.signUp(signupReq)
     const data = this.authService.login(user.id)

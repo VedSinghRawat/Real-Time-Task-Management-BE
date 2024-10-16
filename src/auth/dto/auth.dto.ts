@@ -1,4 +1,4 @@
-import { Validator } from 'src/util'
+import { Validator } from 'src/dto.util'
 import { z } from 'zod'
 
 const signupSchema = z
@@ -17,9 +17,11 @@ const signupSchema = z
   .required()
 
 export type AuthDTOSignup = z.infer<typeof signupSchema>
-export const AuthValidatorSignup = new Validator(signupSchema)
+const signupValidator = new Validator(signupSchema)
 
 const loginSchema = signupSchema.pick({ email: true, password: true })
 
 export type AuthDTOLogin = z.infer<typeof loginSchema>
-export const AuthValidatorLogin = new Validator(loginSchema)
+const loginValidator = new Validator(loginSchema)
+
+export default { signupValidator, loginValidator }
