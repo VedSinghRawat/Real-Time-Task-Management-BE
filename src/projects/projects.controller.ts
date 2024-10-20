@@ -15,11 +15,6 @@ export class ProjectsController {
     return this.projectsService.create({ ...createProjectDto, ownerId: req.user.id })
   }
 
-  @Get()
-  findAll() {
-    return this.projectsService.findAll()
-  }
-
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.projectsService.findOne(+id)
@@ -45,5 +40,10 @@ export class ProjectsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.projectsService.remove(+id)
+  }
+
+  @Get('user')
+  listByUser(@Req() req: Request & { user: User }) {
+    return this.projectsService.listByUser(req.user.id)
   }
 }

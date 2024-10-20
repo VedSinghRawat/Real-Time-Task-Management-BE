@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm'
-import { bigint, bigserial, boolean, integer, pgEnum, pgTable, text, timestamp, unique, varchar } from 'drizzle-orm/pg-core'
+import { bigint, bigserial, boolean, integer, pgEnum, pgTable, primaryKey, text, timestamp, unique, varchar } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
@@ -15,33 +15,30 @@ export const userRelations = relations(users, ({ many }) => ({
   taskUsers: many(taskUsers),
 }))
 
-export const projects = pgTable(
-  'projects',
-  {
-    id: bigserial('id', { mode: 'number' }).primaryKey(),
-    title: varchar('name', { length: 50 }).notNull(),
-    description: text('description').notNull(),
-    public: boolean('public').default(false).notNull(),
-    ownerId: bigint('owner_id', { mode: 'number' })
-      .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => ({
-    projNameUniq: unique().on(table.title, table.ownerId),
-  })
-)
+export const projects = pgTable('projects', {
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  title: varchar('name', { length: 50 }).notNull(),
+  description: text('description').notNull(),
+  ownerId: bigint('owner_id', { mode: 'number' })
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  public: boolean('public').default(false).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+})
 export type Project = typeof projects.$inferSelect
 
-export const projectRelations = relations(projects, ({ many }) => ({
+export const projectRelations = relations(projects, ({ many, one }) => ({
   projectUsers: many(projectUsers),
+  owner: one(users, {
+    fields: [projects.ownerId],
+    references: [users.id],
+  }),
 }))
 
-export const roleEnum = pgEnum('role', ['team leader', 'member'])
+export const roleEnum = pgEnum('role', ['team_leader', 'member', 'owner'])
 export const projectUsers = pgTable(
   'project_users',
   {
-    id: bigserial('id', { mode: 'number' }).primaryKey(),
     projectId: bigint('project_id', { mode: 'number' })
       .notNull()
       .references(() => projects.id, { onDelete: 'cascade' }),
@@ -49,10 +46,9 @@ export const projectUsers = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     role: roleEnum('role'),
-    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
-    projUserUniq: unique().on(table.projectId, table.userId),
+    pk: primaryKey({ columns: [table.projectId, table.userId] }),
   })
 )
 export type ProjectUser = typeof projectUsers.$inferSelect

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DatabaseService } from 'src/database/database.service'
-import { projects } from 'src/database/database.schema'
+import { projects, projectUsers } from 'src/database/database.schema'
 import projectsDto from './dto/projects.dto'
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
@@ -31,5 +31,12 @@ export class ProjectsService {
 
   async remove(id: number) {
     return await this.db.delete(projects).where(eq(projects.id, id))
+  }
+
+  async listByUser(userId: number) {
+    return await this.db.query.projectUsers.findMany({
+      where: eq(projectUsers.userId, userId),
+      with: { project: true },
+    })
   }
 }
