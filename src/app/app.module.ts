@@ -8,6 +8,7 @@ import { EnviromentVariables } from '../interfaces/config'
 import { UsersModule } from '../users/users.module'
 import { AuthModule } from '../auth/auth.module'
 import { ProjectsModule } from '../projects/projects.module'
+import { SeedingModule } from 'src/seeding/seeding.module'
 
 const configValidtionSchema: Joi.PartialSchemaMap<{
   [K in keyof EnviromentVariables]: unknown
@@ -27,6 +28,7 @@ const configValidtionSchema: Joi.PartialSchemaMap<{
     UsersModule,
     AuthModule,
     ProjectsModule,
+    SeedingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

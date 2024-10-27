@@ -1,5 +1,5 @@
 {
-  "id": "87cf4b8e-97fc-4132-ad38-c22943f6ae75",
+  "id": "da5ae274-e4f0-441d-be4e-4d7652a4fe7d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -8,12 +8,6 @@
       "name": "project_users",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "bigserial",
-          "primaryKey": true,
-          "notNull": true
-        },
         "project_id": {
           "name": "project_id",
           "type": "bigint",
@@ -31,13 +25,6 @@
           "type": "role",
           "primaryKey": false,
           "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
@@ -69,17 +56,16 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "project_users_project_id_user_id_unique": {
-          "name": "project_users_project_id_user_id_unique",
-          "nullsNotDistinct": false,
+      "compositePrimaryKeys": {
+        "project_users_project_id_user_id_pk": {
+          "name": "project_users_project_id_user_id_pk",
           "columns": [
             "project_id",
             "user_id"
           ]
         }
-      }
+      },
+      "uniqueConstraints": {}
     },
     "projects": {
       "name": "projects",
@@ -103,18 +89,18 @@
           "primaryKey": false,
           "notNull": true
         },
+        "owner_id": {
+          "name": "owner_id",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": true
+        },
         "public": {
           "name": "public",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
           "default": false
-        },
-        "owner_id": {
-          "name": "owner_id",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -141,16 +127,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "projects_name_owner_id_unique": {
-          "name": "projects_name_owner_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "name",
-            "owner_id"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "task_users": {
       "name": "task_users",
@@ -170,12 +147,6 @@
         },
         "task_id": {
           "name": "task_id",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "project_id": {
-          "name": "project_id",
           "type": "bigint",
           "primaryKey": false,
           "notNull": true
@@ -215,30 +186,16 @@
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
-        },
-        "task_users_project_id_projects_id_fk": {
-          "name": "task_users_project_id_projects_id_fk",
-          "tableFrom": "task_users",
-          "tableTo": "projects",
-          "columnsFrom": [
-            "project_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "task_users_user_id_task_id_project_id_unique": {
-          "name": "task_users_user_id_task_id_project_id_unique",
+        "task_users_user_id_task_id_unique": {
+          "name": "task_users_user_id_task_id_unique",
           "nullsNotDistinct": false,
           "columns": [
             "user_id",
-            "task_id",
-            "project_id"
+            "task_id"
           ]
         }
       }
@@ -323,12 +280,13 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "tasks_order_type_unique": {
-          "name": "tasks_order_type_unique",
+        "tasks_order_type_project_id_unique": {
+          "name": "tasks_order_type_project_id_unique",
           "nullsNotDistinct": false,
           "columns": [
             "order",
-            "type"
+            "type",
+            "project_id"
           ]
         }
       }
@@ -345,7 +303,7 @@
         },
         "username": {
           "name": "username",
-          "type": "varchar(24)",
+          "type": "varchar(64)",
           "primaryKey": false,
           "notNull": true
         },
@@ -357,7 +315,7 @@
         },
         "password": {
           "name": "password",
-          "type": "text",
+          "type": "varchar",
           "primaryKey": false,
           "notNull": true
         },
@@ -387,8 +345,9 @@
     "role": {
       "name": "role",
       "values": {
-        "team leader": "team leader",
-        "member": "member"
+        "team_leader": "team_leader",
+        "member": "member",
+        "owner": "owner"
       }
     },
     "task_type": {

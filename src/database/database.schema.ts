@@ -3,7 +3,7 @@ import { bigint, bigserial, boolean, integer, pgEnum, pgTable, primaryKey, text,
 
 export const users = pgTable('users', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
-  username: varchar('username', { length: 24 }).notNull(),
+  username: varchar('username', { length: 64 }).notNull(),
   email: varchar('email', { length: 320 }).notNull().unique(),
   password: varchar('password').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
@@ -81,7 +81,7 @@ export const tasks = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
-    orderTypeUniq: unique().on(table.order, table.type),
+    orderTypeUniq: unique().on(table.order, table.type, table.projectId),
   })
 )
 export type Task = typeof tasks.$inferSelect
@@ -103,13 +103,10 @@ export const taskUsers = pgTable(
     taskId: bigint('task_id', { mode: 'number' })
       .notNull()
       .references(() => tasks.id, { onDelete: 'cascade' }),
-    projectId: bigint('project_id', { mode: 'number' })
-      .notNull()
-      .references(() => projects.id, { onDelete: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => ({
-    userTaskUniq: unique().on(table.userId, table.taskId, table.projectId),
+    userTaskUniq: unique().on(table.userId, table.taskId),
   })
 )
 export type TaskUser = typeof taskUsers.$inferSelect
