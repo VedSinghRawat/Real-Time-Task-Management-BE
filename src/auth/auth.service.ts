@@ -3,6 +3,7 @@ import { hash, compare } from 'bcrypt'
 import { UsersService } from 'src/users/users.service'
 import { JwtService } from '@nestjs/jwt'
 import { AuthDTOSignup } from './dto/auth.dto'
+import { SALT_ROUNDS } from 'src/constants'
 
 @Injectable()
 export class AuthService {
@@ -10,8 +11,6 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService
   ) {}
-
-  private readonly SALT_ROUNDS = 16
 
   async validateUser(email: string, password: string) {
     const user = await this.usersService.findByEmail(email)
@@ -26,7 +25,7 @@ export class AuthService {
   login(id: number) {
     const payload = { id }
     return {
-      access_token: this.jwtService.sign(payload, { expiresIn: '30days' }),
+      access_token: this.jwtService.sign(payload, { expiresIn: '14d' }),
     }
   }
 
@@ -38,7 +37,7 @@ export class AuthService {
       throw new BadRequestException('User already exists')
     }
 
-    const hashedPassword = await hash(password, this.SALT_ROUNDS)
+    const hashedPassword = await hash(password, SALT_ROUNDS)
     const user = await this.usersService.create({ ...userData, password: hashedPassword })
     return user
   }

@@ -15,7 +15,7 @@ import { JwtStrategy } from './gaurds/jwt/jwt.stratergy'
     JwtModule.registerAsync({
       useFactory: () => ({
         secret: process.env.JWT_SECRET,
-        signOptions: { expiresIn: '7d' },
+        signOptions: { expiresIn: '14d' },
       }),
     }),
   ],

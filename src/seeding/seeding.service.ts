@@ -3,7 +3,8 @@ import { DatabaseService } from 'src/database/database.service'
 import { faker } from '@faker-js/faker'
 import { Project, projects, ProjectUser, projectUsers, Task, tasks, taskUsers, User, users } from 'src/database/database.schema'
 import { and, inArray } from 'drizzle-orm'
-import { hashSync } from 'bcrypt'
+import { hash } from 'bcrypt'
+import { SALT_ROUNDS } from 'src/constants'
 
 @Injectable()
 export class SeedingService {
@@ -24,18 +25,22 @@ export class SeedingService {
     }
 
     const emails = new Set<string>()
-    const u = Array.from({ length: 5000 }, () => {
-      let email = faker.internet.email()
+    const u = await Promise.all(
+      Array.from({ length: 5000 }).map(async () => {
+        {
+          let email = faker.internet.email()
 
-      while (emails.has(email)) {
-        email = faker.internet.email()
-      }
-      emails.add(email)
+          while (emails.has(email)) {
+            email = faker.internet.email()
+          }
+          emails.add(email)
 
-      return { email, password: hashSync(faker.internet.password(), 16), username: faker.internet.userName() }
-    })
-
-    u.unshift({ email: 'ved.rawat04@gmail.com', password: hashSync('ved123', 16), username: 'VedSinghRawat' })
+          const u = { email, password: await hash(faker.internet.password(), SALT_ROUNDS), username: faker.internet.userName() }
+          return u
+        }
+      })
+    )
+    u.unshift({ email: 'ved.rawat04@gmail.com', password: await hash('ved123', SALT_ROUNDS), username: 'VedSinghRawat' })
 
     const newUsers = await this.db.insert(users).values(u).returning()
 
@@ -130,7 +135,7 @@ export class SeedingService {
     const projUsEntries: (typeof projectUsers.$inferInsert)[] = []
 
     projs.forEach((proj) => {
-      const numUsers = faker.number.int({ min: 4, max: 12 })
+      const numUsers = faker.number.int({ min: 12, max: 25 })
       const userIds = faker.helpers
         .arrayElements(users, numUsers)
         .filter((user) => !userIdsToProjIds[proj.id]!.includes(user.id))
@@ -147,7 +152,10 @@ export class SeedingService {
       )
     })
 
-    await this.db.insert(projectUsers).values(projUsEntries)
+    for (let i = 0; i < projUsEntries.length; i += 5000) {
+      const batch = projUsEntries.slice(i, i + 5000)
+      await this.db.insert(projectUsers).values(batch)
+    }
 
     console.timeEnd('Project users seeding')
 
