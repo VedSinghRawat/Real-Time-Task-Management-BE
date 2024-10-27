@@ -3,6 +3,7 @@ import { DatabaseService } from 'src/database/database.service'
 import { faker } from '@faker-js/faker'
 import { Project, projects, ProjectUser, projectUsers, Task, tasks, taskUsers, User, users } from 'src/database/database.schema'
 import { and, inArray } from 'drizzle-orm'
+import { hashSync } from 'bcrypt'
 
 @Injectable()
 export class SeedingService {
@@ -23,21 +24,20 @@ export class SeedingService {
     }
 
     const emails = new Set<string>()
-    const newUsers = await this.db
-      .insert(users)
-      .values(
-        Array.from({ length: 5000 }, () => {
-          let email = faker.internet.email()
+    const u = Array.from({ length: 5000 }, () => {
+      let email = faker.internet.email()
 
-          while (emails.has(email)) {
-            email = faker.internet.email()
-          }
-          emails.add(email)
+      while (emails.has(email)) {
+        email = faker.internet.email()
+      }
+      emails.add(email)
 
-          return { email, password: faker.internet.password(), username: faker.internet.userName() }
-        })
-      )
-      .returning()
+      return { email, password: hashSync(faker.internet.password(), 16), username: faker.internet.userName() }
+    })
+
+    u.unshift({ email: 'ved.rawat04@gmail.com', password: hashSync('ved123', 16), username: 'VedSinghRawat' })
+
+    const newUsers = await this.db.insert(users).values(u).returning()
 
     console.timeEnd('Users seeding')
     return newUsers
