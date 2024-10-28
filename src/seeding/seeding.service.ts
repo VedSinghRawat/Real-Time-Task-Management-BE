@@ -40,7 +40,7 @@ export class SeedingService {
         }
       })
     )
-    u.unshift({ email: 'ved.rawat04@gmail.com', password: await hash('ved123', SALT_ROUNDS), username: 'VedSinghRawat' })
+    u.unshift({ email: 'ved.rawat04@gmail.com', password: await hash('Ved123)(*', SALT_ROUNDS), username: 'VedSinghRawat' })
 
     const newUsers = await this.db.insert(users).values(u).returning()
 
