@@ -75,19 +75,29 @@ export class SeedingService {
       return { projects: currProjs, projectUsers: currProjUsers }
     }
 
-    const user = faker.helpers.arrayElements(users, Math.floor(users.length * 0.3))
+    const projs: (typeof projects.$inferSelect)[] = []
 
-    const projs = await this.db
-      .insert(projects)
-      .values(
-        user.map((user) => ({
-          description: faker.lorem.paragraphs(2),
-          title: faker.lorem.words(3),
-          public: faker.datatype.boolean(),
-          ownerId: user.id,
-        }))
-      )
-      .returning()
+    await Promise.all(
+      Array.from({ length: 3 }, async () => {
+        const sampleUsers = faker.helpers.arrayElements(users, Math.floor(users.length * 0.3))
+        const me = sampleUsers.find((user) => user.id === 1)
+        if (!me) sampleUsers.push(users[0]!)
+
+        const p = await this.db
+          .insert(projects)
+          .values(
+            sampleUsers.map((user) => ({
+              description: faker.lorem.paragraphs(2),
+              title: faker.lorem.words(3),
+              public: faker.datatype.boolean(),
+              ownerId: user.id,
+            }))
+          )
+          .returning()
+
+        projs.push(...p)
+      })
+    )
 
     const projUsers = await this.db
       .insert(projectUsers)
@@ -99,7 +109,6 @@ export class SeedingService {
         }))
       )
       .returning()
-
     console.timeEnd('Projects seeding')
 
     return { projects: projs, projectUsers: projUsers }
@@ -183,9 +192,9 @@ export class SeedingService {
 
       Array.from({ length: faker.number.int({ min: 10, max: 50 }) }, () => {
         const estimatedTime = faker.number.int({ min: 60 * 10, max: 60 * 60 * 10 })
-        const timeLeft = faker.number.int({ min: 60 * 10, max: estimatedTime })
+        const timeLeft = Math.random() <= 0.7 ? faker.number.int({ min: 0, max: estimatedTime }) : 0
         const type = faker.helpers.arrayElement(['todo', 'doing', 'done'])
-        const order = typeMap[type]++
+        const order = ++typeMap[type]
 
         ts.push({
           projectId: proj.id,
