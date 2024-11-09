@@ -34,9 +34,19 @@ export class ProjectsService {
   }
 
   async listByUser(userId: number) {
-    return await this.db.query.projectUsers.findMany({
+    const res = await this.db.query.projectUsers.findMany({
       where: eq(projectUsers.userId, userId),
       with: { project: true },
     })
+
+    const projs: (typeof projects.$inferSelect)[] = []
+    const projUs: (typeof projectUsers.$inferSelect)[] = []
+
+    res.forEach(({ project, ...projectUser }) => {
+      projs.push(project)
+      projUs.push(projectUser)
+    })
+
+    return { projects: projs, projectUsers: projUs }
   }
 }

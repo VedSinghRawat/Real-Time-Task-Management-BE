@@ -45,7 +45,7 @@ export const projectUsers = pgTable(
     userId: bigint('user_id', { mode: 'number' })
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    role: roleEnum('role'),
+    role: roleEnum('role').notNull(),
   },
   (table) => ({
     pk: primaryKey({ columns: [table.projectId, table.userId] }),
