@@ -9,12 +9,16 @@ import { UsersModule } from '../users/users.module'
 import { AuthModule } from '../auth/auth.module'
 import { ProjectsModule } from '../projects/projects.module'
 import { SeedingModule } from 'src/seeding/seeding.module'
+import { S3Module } from 'src/s3/s3.module'
 
 const configValidtionSchema: Joi.PartialSchemaMap<{
   [K in keyof EnviromentVariables]: unknown
 }> = {
   DATABASE_URL: Joi.string(),
   JWT_SECRET: Joi.string(),
+  BUCKET_NAME: Joi.string(),
+  AWS_ACCESS_KEY_ID: Joi.string(),
+  AWS_SECRET_ACCESS_KEY: Joi.string(),
 }
 
 @Module({
@@ -29,6 +33,7 @@ const configValidtionSchema: Joi.PartialSchemaMap<{
     AuthModule,
     ProjectsModule,
     SeedingModule,
+    S3Module,
   ],
   providers: [AppService],
 })

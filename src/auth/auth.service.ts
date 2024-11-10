@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
-import { hash, compare } from 'bcrypt'
+import { compare } from 'bcrypt'
 import { UsersService } from 'src/users/users.service'
 import { JwtService } from '@nestjs/jwt'
 import { AuthDTOSignup } from './dto/auth.dto'
-import { SALT_ROUNDS } from 'src/constants'
+import { encrypt } from 'src/util'
 
 @Injectable()
 export class AuthService {
@@ -37,7 +37,7 @@ export class AuthService {
       throw new BadRequestException('User already exists')
     }
 
-    const hashedPassword = await hash(password, SALT_ROUNDS)
+    const hashedPassword = await encrypt(password)
     const user = await this.usersService.create({ ...userData, password: hashedPassword })
     return user
   }

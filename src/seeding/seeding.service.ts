@@ -3,8 +3,7 @@ import { DatabaseService } from 'src/database/database.service'
 import { faker } from '@faker-js/faker'
 import { Project, projects, ProjectUser, projectUsers, Task, tasks, taskUsers, User, users } from 'src/database/database.schema'
 import { and, inArray } from 'drizzle-orm'
-import { hash } from 'bcrypt'
-import { SALT_ROUNDS } from 'src/constants'
+import { encrypt } from 'src/util'
 
 @Injectable()
 export class SeedingService {
@@ -35,12 +34,12 @@ export class SeedingService {
           }
           emails.add(email)
 
-          const u = { email, password: await hash(faker.internet.password(), SALT_ROUNDS), username: faker.internet.userName() }
+          const u = { email, password: await encrypt(faker.internet.password()), username: faker.internet.userName() }
           return u
         }
       })
     )
-    u.unshift({ email: 'ved.rawat04@gmail.com', password: await hash('Ved123)(*', SALT_ROUNDS), username: 'VedSinghRawat' })
+    u.unshift({ email: 'ved.rawat04@gmail.com', password: await encrypt('Ved123)(*'), username: 'VedSinghRawat' })
 
     const newUsers = await this.db.insert(users).values(u).returning()
 

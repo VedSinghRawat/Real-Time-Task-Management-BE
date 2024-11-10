@@ -17,8 +17,9 @@ export const userRelations = relations(users, ({ many }) => ({
 
 export const projects = pgTable('projects', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
-  title: varchar('name', { length: 50 }).notNull(),
+  title: varchar('title', { length: 50 }).notNull(),
   description: text('description').notNull(),
+  image: varchar('image', { length: 255 }),
   ownerId: bigint('owner_id', { mode: 'number' })
     .notNull()
     .references(() => users.id, { onDelete: 'cascade' }),

@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DatabaseService } from 'src/database/database.service'
 import { projects, projectUsers } from 'src/database/database.schema'
-import projectsDto from './dto/projects.dto'
-import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 
 @Injectable()
@@ -14,7 +12,7 @@ export class ProjectsService {
   }
 
   async create(proj: typeof projects.$inferInsert) {
-    return await this.db.insert(projects).values(proj).returning()
+    return (await this.db.insert(projects).values(proj).returning())[0]!
   }
 
   async findAll() {
@@ -25,7 +23,7 @@ export class ProjectsService {
     return (await this.db.select().from(projects).where(eq(projects.id, id)))[0]
   }
 
-  async update(id: number, updateProjectDto: z.infer<typeof projectsDto.updateSchema>) {
+  async update(id: number, updateProjectDto: Partial<typeof projects.$inferInsert>) {
     return await this.db.update(projects).set(updateProjectDto).where(eq(projects.id, id))
   }
 
@@ -47,6 +45,6 @@ export class ProjectsService {
       projUs.push(projectUser)
     })
 
-    return { projects: projs, projectUsers: projUs }
+    return { project: projs, projectUser: projUs }
   }
 }
