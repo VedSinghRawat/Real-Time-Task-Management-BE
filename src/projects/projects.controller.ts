@@ -23,6 +23,7 @@ import { encrypt } from 'src/util'
 import { S3Service } from 'src/s3/s3.service'
 import { EnviromentVariables } from 'src/interfaces/config'
 import { ConfigService } from '@nestjs/config'
+import path from 'path'
 
 @Controller('projects')
 export class ProjectsController {
@@ -35,19 +36,20 @@ export class ProjectsController {
   @UseGuards(JwtAuthGuard)
   @Post()
   @UsePipes(projectsDto.createValidator)
-  @UseInterceptors(FileInterceptor('file'))
-  async create(@Body() createProjectDto: ProjectCreateDTO, @Req() req: Request & { user: User }, @UploadedFile() file: Express.Multer.File) {
+  @UseInterceptors(FileInterceptor('image'))
+  async create(@Body() createProjectDto: ProjectCreateDTO, @Req() req: Request & { user: User }, @UploadedFile() imageFile: Express.Multer.File) {
     const project = await this.projectsService.create({ ...createProjectDto, ownerId: req.user.id })
-    if (!file) return { project }
+    if (!imageFile) return { project }
 
-    const image = await encrypt(`${project.id}-proj-image`)
+    const imageHash = await encrypt(`${project.id}-proj-image`)
+    const imageKey = `${imageHash}.${path.extname(imageFile.originalname)}`
     const bucketName = this.configService.get('BUCKET_NAME', { infer: true })
     if (!bucketName) throw 'No BUCKET_NAME found in env'
 
     try {
-      await this.s3Service.putObject(bucketName, image, file.buffer, { ContentType: file.mimetype })
+      await this.s3Service.putObject(bucketName, imageKey, imageFile.buffer, { ContentType: imageFile.mimetype })
 
-      const updatedProj = await this.projectsService.update(project.id, { image })
+      const updatedProj = await this.projectsService.update(project.id, { image: imageKey })
 
       return { project: updatedProj }
     } catch (err) {

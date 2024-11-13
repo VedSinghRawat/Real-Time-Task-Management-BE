@@ -1,5 +1,5 @@
 {
-  "id": "da5ae274-e4f0-441d-be4e-4d7652a4fe7d",
+  "id": "87e22a31-f371-4f60-a811-3435ae5878f7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -24,7 +24,7 @@
           "name": "role",
           "type": "role",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         }
       },
       "indexes": {},
@@ -77,8 +77,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "name": {
-          "name": "name",
+        "title": {
+          "name": "title",
           "type": "varchar(50)",
           "primaryKey": false,
           "notNull": true
@@ -88,6 +88,12 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "image": {
+          "name": "image",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
         },
         "owner_id": {
           "name": "owner_id",

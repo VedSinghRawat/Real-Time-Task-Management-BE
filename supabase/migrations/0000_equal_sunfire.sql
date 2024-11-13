@@ -13,14 +13,15 @@ END $$;
 CREATE TABLE IF NOT EXISTS "project_users" (
 	"project_id" bigint NOT NULL,
 	"user_id" bigint NOT NULL,
-	"role" "role",
+	"role" "role" NOT NULL,
 	CONSTRAINT "project_users_project_id_user_id_pk" PRIMARY KEY("project_id","user_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "projects" (
 	"id" bigserial PRIMARY KEY NOT NULL,
-	"name" varchar(50) NOT NULL,
+	"title" varchar(50) NOT NULL,
 	"description" text NOT NULL,
+	"image" varchar(255),
 	"owner_id" bigint NOT NULL,
 	"public" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
