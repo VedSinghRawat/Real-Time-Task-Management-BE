@@ -20,20 +20,13 @@ export const projects = pgTable('projects', {
   title: varchar('title', { length: 50 }).notNull(),
   description: text('description').notNull(),
   image: varchar('image', { length: 255 }),
-  ownerId: bigint('owner_id', { mode: 'number' })
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
   public: boolean('public').default(false).notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })
 export type Project = typeof projects.$inferSelect
 
-export const projectRelations = relations(projects, ({ many, one }) => ({
+export const projectRelations = relations(projects, ({ many }) => ({
   projectUsers: many(projectUsers),
-  owner: one(users, {
-    fields: [projects.ownerId],
-    references: [users.id],
-  }),
 }))
 
 export const roleEnum = pgEnum('role', ['team_leader', 'member', 'owner'])

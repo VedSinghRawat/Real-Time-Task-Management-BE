@@ -8,6 +8,13 @@
       "when": 1731517126528,
       "tag": "0000_equal_sunfire",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1732037310911,
+      "tag": "0001_legal_wither",
+      "breakpoints": true
     }
   ]
 }

@@ -10,6 +10,8 @@ export class Validator<T extends ZodType> implements PipeTransform {
       return this.schema.parse(value) as T['_output']
     } catch (error) {
       if (error instanceof ZodError) {
+        console.error({ validationError: error, value })
+
         const errs = error.issues.reduce<{
           [key in keyof T['_output']]?: string
         }>((curr, issue) => {
@@ -21,6 +23,8 @@ export class Validator<T extends ZodType> implements PipeTransform {
 
         throw new BadRequestException(errs)
       }
+
+      throw new BadRequestException('Invalid request body')
     }
   }
 }

@@ -74,40 +74,33 @@ export class SeedingService {
       return { projects: currProjs, projectUsers: currProjUsers }
     }
 
-    const projs: (typeof projects.$inferSelect)[] = []
+    const projPayload: (typeof projects.$inferInsert)[] = []
+    const projUserPayload: (typeof projectUsers.$inferInsert)[] = []
 
-    await Promise.all(
-      Array.from({ length: 3 }, async () => {
-        const sampleUsers = faker.helpers.arrayElements(users, Math.floor(users.length * 0.3))
-        const me = sampleUsers.find((user) => user.id === 1)
-        if (!me) sampleUsers.push(users[0]!)
+    Array.from({ length: 3 }, () => {
+      const sampleUsers = faker.helpers.arrayElements(users, Math.floor(users.length * 0.3))
+      const me = sampleUsers.find((user) => user.id === 1)
+      if (!me) sampleUsers.push(users[0]!)
 
-        const p = await this.db
-          .insert(projects)
-          .values(
-            sampleUsers.map((user) => ({
-              description: faker.lorem.paragraphs(2),
-              title: faker.lorem.words(3),
-              public: faker.datatype.boolean(),
-              ownerId: user.id,
-            }))
-          )
-          .returning()
+      sampleUsers.forEach((u) => {
+        const proj = {
+          description: faker.lorem.paragraphs(2),
+          title: faker.lorem.words(3),
+          public: faker.datatype.boolean(),
+        }
+        projPayload.push(proj)
 
-        projs.push(...p)
-      })
-    )
-
-    const projUsers = await this.db
-      .insert(projectUsers)
-      .values(
-        projs.map((proj) => ({
-          projectId: proj.id,
-          userId: proj.ownerId,
+        const projUser = {
+          projectId: projPayload.length,
+          userId: u.id,
           role: 'owner' as const,
-        }))
-      )
-      .returning()
+        }
+        projUserPayload.push(projUser)
+      })
+    })
+
+    const projs = await this.db.insert(projects).values(projPayload).returning()
+    const projUsers = await this.db.insert(projectUsers).values(projUserPayload).returning()
     console.timeEnd('Projects seeding')
 
     return { projects: projs, projectUsers: projUsers }

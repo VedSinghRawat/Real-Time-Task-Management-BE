@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { DatabaseService } from 'src/database/database.service'
 import { projects, projectUsers } from 'src/database/database.schema'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 
 @Injectable()
 export class ProjectsService {
@@ -11,8 +11,16 @@ export class ProjectsService {
     this.db = _.db
   }
 
-  async create(proj: typeof projects.$inferInsert) {
-    return (await this.db.insert(projects).values(proj).returning())[0]!
+  async create(proj: typeof projects.$inferInsert, ownerId: number) {
+    const project = (await this.db.insert(projects).values(proj).returning())[0]!
+    const projectUser = (
+      await this.db
+        .insert(projectUsers)
+        .values({ projectId: project.id, userId: ownerId, role: 'owner' as const })
+        .returning()
+    )[0]!
+
+    return { project, projectUser }
   }
 
   async findAll() {
@@ -46,5 +54,16 @@ export class ProjectsService {
     })
 
     return { project: projs, projectUser: projUs }
+  }
+
+  async isOwner(projectId: number, userId: number) {
+    const projUser = (
+      await this.db
+        .select()
+        .from(projectUsers)
+        .where(and(eq(projectUsers.projectId, projectId), eq(projectUsers.role, 'owner')))
+    )[0]
+
+    return projUser?.userId === userId
   }
 }
