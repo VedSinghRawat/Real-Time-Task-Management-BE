@@ -6,7 +6,6 @@ import {
   Patch,
   Param,
   Delete,
-  UsePipes,
   UseGuards,
   Req,
   ForbiddenException,
@@ -15,10 +14,11 @@ import {
   UseInterceptors,
 } from '@nestjs/common'
 import { ProjectsService } from './projects.service'
-import projectsDto, { ProjectUpdateDTO } from './dto/projects.dto'
+import projectsDto from './dto/projects.dto'
 import { JwtAuthGuard } from 'src/auth/gaurds/jwt/jwt.guard'
 import { User } from 'src/database/database.schema'
 import { FileInterceptor } from '@nestjs/platform-express'
+import { FormDataParse } from 'src/dto.util'
 
 @Controller('projects')
 export class ProjectsController {
@@ -27,8 +27,7 @@ export class ProjectsController {
   @UseGuards(JwtAuthGuard)
   @Post()
   @UseInterceptors(FileInterceptor('image'))
-  @UsePipes()
-  async create(@Body() body: unknown, @UploadedFile() imageFile: Express.Multer.File, @Req() req: Request & { user: User }) {
+  async create(@Body(new FormDataParse()) body: unknown, @UploadedFile() imageFile: Express.Multer.File, @Req() req: Request & { user: User }) {
     const createProjectDto = projectsDto.createValidator.transform(body)
 
     const data = await this.projectsService.create(createProjectDto, req.user.id, imageFile)
@@ -49,17 +48,26 @@ export class ProjectsController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  @UsePipes(projectsDto.updateValidator)
-  async update(@Param('id') id: string, @Body() updateProjectDto: ProjectUpdateDTO, @Req() req: Request & { user: User }) {
+  @UseInterceptors(FileInterceptor('image'))
+  async update(
+    @Param('id') id: string,
+    @Body(new FormDataParse()) body: unknown,
+    @UploadedFile() imageFile: Express.Multer.File,
+    @Req() req: Request & { user: User }
+  ) {
+    const updateProjectDto = projectsDto.updateValidator.transform(body)
+
     const project = await this.projectsService.findOne(+id)
 
     if (!project) throw new NotFoundException('Project not found')
 
     if (!(await this.projectsService.isOwner(+id, req.user.id))) throw new ForbiddenException('You are not authorized to update this project')
 
-    return this.projectsService.update(project, updateProjectDto)
+    const updatedProject = await this.projectsService.update(project, updateProjectDto, imageFile)
+    return { project: updatedProject }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string, @Req() req: Request & { user: User }) {
     const project = await this.projectsService.findOne(+id)
@@ -68,6 +76,7 @@ export class ProjectsController {
 
     if (!(await this.projectsService.isOwner(project.id, req.user.id))) throw new ForbiddenException('You are not authorized to delete this project')
 
-    return this.projectsService.remove(project)
+    const deletedProject = await this.projectsService.remove(project)
+    return { project: deletedProject }
   }
 }

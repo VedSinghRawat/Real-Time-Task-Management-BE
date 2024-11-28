@@ -28,3 +28,19 @@ export class Validator<T extends ZodType> implements PipeTransform {
     }
   }
 }
+
+export class FormDataParse implements PipeTransform {
+  transform(value: unknown) {
+    if (typeof value !== 'object') return value
+
+    const v = value as Record<string, unknown>
+
+    for (const key in v) {
+      if (!Object.prototype.hasOwnProperty.call(v, key)) continue
+      if (v[key] === 'true') v[key] = true
+      else if (v[key] === 'false') v[key] = false
+    }
+
+    return v
+  }
+}

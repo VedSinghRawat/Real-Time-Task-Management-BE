@@ -3,7 +3,7 @@ import { DatabaseService } from 'src/database/database.service'
 import { projects, projectUsers } from 'src/database/database.schema'
 import { and, eq } from 'drizzle-orm'
 import { encrypt } from 'src/util'
-import path from 'path'
+import * as path from 'path'
 import { ConfigService } from '@nestjs/config'
 import { EnviromentVariables } from 'src/interfaces/config'
 import { S3Service } from 'src/s3/s3.service'
@@ -64,7 +64,7 @@ export class ProjectsService {
       console.error(error)
     }
 
-    return await this.db.delete(projects).where(eq(projects.id, curr.id))
+    return (await this.db.delete(projects).where(eq(projects.id, curr.id)).returning())[0]!
   }
 
   async listByUser(userId: number) {
