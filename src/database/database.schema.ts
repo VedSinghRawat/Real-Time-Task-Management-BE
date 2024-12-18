@@ -1,11 +1,10 @@
 import { relations } from 'drizzle-orm'
-import { bigint, bigserial, boolean, integer, pgEnum, pgTable, primaryKey, text, timestamp, unique, varchar } from 'drizzle-orm/pg-core'
+import { bigint, bigserial, boolean, integer, pgEnum, pgTable, primaryKey, text, timestamp, unique, uuid, varchar } from 'drizzle-orm/pg-core'
 
 export const users = pgTable('users', {
-  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  id: uuid('id').primaryKey(),
   username: varchar('username', { length: 64 }).notNull(),
   email: varchar('email', { length: 320 }).notNull().unique(),
-  password: varchar('password').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 })
 export type User = typeof users.$inferSelect
@@ -36,7 +35,7 @@ export const projectUsers = pgTable(
     projectId: bigint('project_id', { mode: 'number' })
       .notNull()
       .references(() => projects.id, { onDelete: 'cascade' }),
-    userId: bigint('user_id', { mode: 'number' })
+    userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     role: roleEnum('role').notNull(),
@@ -91,7 +90,7 @@ export const taskUsers = pgTable(
   'task_users',
   {
     id: bigserial('id', { mode: 'number' }).primaryKey(),
-    userId: bigint('user_id', { mode: 'number' })
+    userId: uuid('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     taskId: bigint('task_id', { mode: 'number' })

@@ -3,11 +3,11 @@ import { DatabaseService } from 'src/database/database.service'
 import { faker } from '@faker-js/faker'
 import { Project, projects, ProjectUser, projectUsers, Task, tasks, taskUsers, User, users } from 'src/database/database.schema'
 import { and, inArray } from 'drizzle-orm'
-import { encrypt } from 'src/util'
 
 @Injectable()
 export class SeedingService {
   private db: DatabaseService['db']
+  private ME_ID = 'da23860c-60c4-4b43-b841-bc250e7b31ef'
 
   constructor(_: DatabaseService) {
     this.db = _.db
@@ -24,22 +24,25 @@ export class SeedingService {
     }
 
     const emails = new Set<string>()
-    const u = await Promise.all(
-      Array.from({ length: 5000 }).map(async () => {
-        {
-          let email = faker.internet.email()
+    const u = Array.from({ length: 5000 }).map(() => {
+      {
+        let email = faker.internet.email()
 
-          while (emails.has(email)) {
-            email = faker.internet.email()
-          }
-          emails.add(email)
-
-          const u = { email, password: await encrypt(faker.internet.password()), username: faker.internet.userName() }
-          return u
+        while (emails.has(email)) {
+          email = faker.internet.email()
         }
-      })
-    )
-    u.unshift({ email: 'ved.rawat04@gmail.com', password: await encrypt('Ved123)(*'), username: 'VedSinghRawat' })
+        emails.add(email)
+
+        const u = { id: faker.string.uuid(), email, username: faker.internet.userName() }
+        return u
+      }
+    })
+
+    u.unshift({
+      id: this.ME_ID,
+      email: 'ved.rawat04@gmail.com',
+      username: 'VedSinghRawat',
+    })
 
     const newUsers = await this.db.insert(users).values(u).returning()
 
@@ -79,7 +82,7 @@ export class SeedingService {
 
     Array.from({ length: 3 }, () => {
       const sampleUsers = faker.helpers.arrayElements(users, Math.floor(users.length * 0.3))
-      const me = sampleUsers.find((user) => user.id === 1)
+      const me = sampleUsers.find((user) => user.id === this.ME_ID)
       if (!me) sampleUsers.push(users[0]!)
 
       sampleUsers.forEach((u) => {
@@ -117,7 +120,7 @@ export class SeedingService {
           acc[curr.projectId] = [...(acc[curr.projectId] || []), curr.userId]
           return acc
         },
-        {} as Record<number, number[]>
+        {} as Record<number, string[]>
       )
 
       console.log('Project Users pivot already seeded')
@@ -130,7 +133,7 @@ export class SeedingService {
         acc[curr.projectId] = [...(acc[curr.projectId] || []), curr.userId]
         return acc
       },
-      {} as Record<number, number[]>
+      {} as Record<number, string[]>
     )
 
     const projUsEntries: (typeof projectUsers.$inferInsert)[] = []
@@ -212,7 +215,7 @@ export class SeedingService {
     return newTasks
   }
 
-  async taskUsers(ts: Task[], userIdsToProjIds: Record<number, number[]>) {
+  async taskUsers(ts: Task[], userIdsToProjIds: Record<number, string[]>) {
     console.log('Seeding task users')
     console.time('Task users seeding')
     const currTaskUsers = await this.db.select().from(taskUsers)

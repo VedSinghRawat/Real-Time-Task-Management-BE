@@ -5,9 +5,6 @@ import { ConfigModule } from '@nestjs/config'
 // This has to imported like this ignore the IDE suggestion
 import * as Joi from 'joi'
 import { EnviromentVariables } from '../interfaces/config'
-import { UsersModule } from '../users/users.module'
-import { AuthModule } from '../auth/auth.module'
-import { ProjectsModule } from '../projects/projects.module'
 import { SeedingModule } from 'src/seeding/seeding.module'
 import { S3Module } from 'src/s3/s3.module'
 
@@ -29,9 +26,6 @@ const configValidtionSchema: Joi.PartialSchemaMap<{
       isGlobal: true,
     }),
     DatabaseModule,
-    UsersModule,
-    AuthModule,
-    ProjectsModule,
     SeedingModule,
     S3Module,
   ],
