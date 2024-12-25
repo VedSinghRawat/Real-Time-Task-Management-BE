@@ -7,7 +7,7 @@ import { and, inArray } from 'drizzle-orm'
 @Injectable()
 export class SeedingService {
   private db: DatabaseService['db']
-  private ME_ID = 'da23860c-60c4-4b43-b841-bc250e7b31ef'
+  private ME_ID = 'ce807853-b463-4ed4-93a4-d9fe3ac6fd34'
 
   constructor(_: DatabaseService) {
     this.db = _.db
@@ -17,7 +17,7 @@ export class SeedingService {
     console.log('Seeding users')
     console.time('Users seeding')
     const currUsers = await this.db.select().from(users)
-    if (currUsers.length) {
+    if (currUsers.length > 1) {
       console.log('Users already seeded')
       console.timeEnd('Users seeding')
       return currUsers
@@ -38,13 +38,8 @@ export class SeedingService {
       }
     })
 
-    u.unshift({
-      id: this.ME_ID,
-      email: 'ved.rawat04@gmail.com',
-      username: 'VedSinghRawat',
-    })
-
     const newUsers = await this.db.insert(users).values(u).returning()
+    newUsers.unshift(...currUsers)
 
     console.timeEnd('Users seeding')
     return newUsers
@@ -80,10 +75,11 @@ export class SeedingService {
     const projPayload: (typeof projects.$inferInsert)[] = []
     const projUserPayload: (typeof projectUsers.$inferInsert)[] = []
 
+    const me = users.find((user) => user.id === this.ME_ID)!
     Array.from({ length: 3 }, () => {
       const sampleUsers = faker.helpers.arrayElements(users, Math.floor(users.length * 0.3))
-      const me = sampleUsers.find((user) => user.id === this.ME_ID)
-      if (!me) sampleUsers.push(users[0]!)
+      const hasMe = sampleUsers.find((user) => user.id === this.ME_ID)
+      if (!hasMe) sampleUsers.push(me)
 
       sampleUsers.forEach((u) => {
         const proj = {
